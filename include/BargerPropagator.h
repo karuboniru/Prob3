@@ -61,6 +61,8 @@ class BargerPropagator : public NeutrinoPropagator
       //  The default is to define the MNS matrix for neutrino propagation
       //  This type must agree with the type used in the call to propagate() and propagateLinear()
       virtual void SetMNS( double , double , double , double , double , double , double , bool, int kNuType = 1 );
+
+      virtual void ResetMNS( double , int nutype = 1 );
       
       // for changing the conversion factor from matter density to electron density
       void SetDensityConversion( double x ) { density_convert = x; }
@@ -69,16 +71,16 @@ class BargerPropagator : public NeutrinoPropagator
       // return oscillation probabilities nu_in -> nu_out
       // nu_ - 1:e 2:mu 3:tau  -1:e_bar -2:mu_bar -3:tau_bar
       double GetProb( int nuIn, int nuOut ){ 
-     	int In = abs( nuIn );
-	int Out = abs( nuOut );
+               int In  = abs( nuIn  );
+               int Out = abs( nuOut );
                return Probability[In-1][Out-1];
             };
       
       
       // miscellaneuos
-      double GetPathLength(){return Earth->get_Pathlength();}
-      void SetPathLength( double x ){ PathLength = x;}
-      void SetEnergy    ( double x ){ Energy     = x;}   
+      double GetPathLength()            {return Earth->get_Pathlength();}
+      void SetPathLength( double x )    { PathLength = x;}
+      void SetEnergy    ( double x )    { Energy     = x;}   
       virtual void SetMatterPathLength();
       virtual void SetAirPathLength(double);
       
@@ -100,6 +102,13 @@ class BargerPropagator : public NeutrinoPropagator
       //  performed, and the user is responsible for supplying the correct 
       //  value of Dm23 for oscillations in both hierarchies.  
       void SetOneMassScaleMode  ( bool x = true)  { kOneDominantMass  = x ; }
+
+      double GetPathAveragedDensity( );
+
+      //   parameter [ 12 , 13 , 23 ] , octant [ 1, 2]
+      void   SetDefaultOctant( int var = 23  , int octant = 1 );
+
+      double TransitionProduct[3][3][2];
 
   protected:
       void init();
@@ -124,7 +133,22 @@ class BargerPropagator : public NeutrinoPropagator
       bool kSuppressWarnings  ; 
       bool kUseMassEigenstates;
       bool kOneDominantMass   ;  
+
+      int  kSx12Octant ;
+      int  kSx13Octant ;
+      int  kSx23Octant ;
+
       
+      double fx12      ; 
+      double fx13      ;
+      double fx23      ;
+      double fm21      ;
+      double fmAtm     ;
+      double fdelta    ;
+
+      bool   fSquared  ;
+
+
 };
       
 #endif

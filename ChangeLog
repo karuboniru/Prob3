@@ -1,4 +1,12 @@
 
+Library Version 3.1  (2018.12.01)
+ + No change to function of PMNS oscillations 
+ + Add support for Lorentz invariance-violating oscillations with the framework of the 
+   "Standard Model Extension" (A. Kostelecky et. al) 
+ + Simple python wrapper (in c_types) PMNS oscillations (BargerPropagator) and 
+   supporting example program 
+
+
 Library Version 2.1  (2012.12.25)
 
  + Allow differentiation between "one mass scale" mode 

@@ -2,7 +2,10 @@
 
 BargerPropagator::BargerPropagator()
 {
+//Earth = NULL;
+//std::cout << "BargerPropagator:: " << Earth << " address " << &Earth <<std::endl;; 
    Earth = new EarthDensity( );	
+//std::cout << "BargerPropagator:: " << Earth << " address " << &Earth <<std::endl;; 
    init();
 }
 
@@ -30,7 +33,6 @@ void BargerPropagator::init()
    kUseMassEigenstates = false;
 
    //rad earth in [cm] /
-   REarth = Earth->GetEarthRadiuskm() * 1.0e5;
    ProductionHeight = 0.0;
    PathLength = 0.0;
 
@@ -41,6 +43,12 @@ void BargerPropagator::init()
    kSuppressWarnings  = false ;
 
    kOneDominantMass   = true  ;
+
+   // Default is to choose the first octant when converting from 
+   // sin^2 (2x) variables 
+   kSx12Octant = 1 ;
+   kSx13Octant = 1 ;
+   kSx23Octant = 1 ;
 }
 
 
@@ -50,7 +58,7 @@ void BargerPropagator::propagate( int NuFlavor ){
    int    i,j;
    int    Layers;
    double TransitionMatrix[3][3][2];
-   double TransitionProduct[3][3][2];
+   //double TransitionProduct[3][3][2]; // Use global one
    double TransitionTemp[3][3][2];	
    double RawInputPsi[3][2];
    double OutputPsi[3][2];
@@ -85,11 +93,11 @@ void BargerPropagator::propagate( int NuFlavor ){
 	
    for ( i = 0; i < Layers ; i++ )
    {
-      get_transition_matrix( NuFlavor, 
+      get_transition_matrix(  NuFlavor  , 
                               Energy	,		   // in GeV
                               Earth->get_DensityInLayer(i) * density_convert, 
-                              Earth->get_DistanceAcrossLayer(i)/1.0e5,   // in km
-                              TransitionMatrix,			   // Output transition matrix
+                              Earth->get_DistanceAcrossLayer(i)/1.0e5,     // in km
+                              TransitionMatrix,			           // Output transition matrix
                               0.0  					   // phase offset 
                               );			
       		
@@ -137,11 +145,31 @@ void BargerPropagator::ClearProbabilities()
 
 }
 
+// Reload the same mixing matrix elements , but allow for adjustments 
+// based on the neutrino eneryg and flavor
+void BargerPropagator::ResetMNS( double energy, int nutype )
+{
+
+   SetMNS( fx12, fx13, fx23, fm21, fmAtm, fdelta, energy , fSquared , nutype );
+}
+
+
 void BargerPropagator::SetMNS( double x12, double x13, double x23, 
                                double m21, double mAtm, double delta, 
                                double Energy_ , bool kSquared, int kNuType )
 {
    Energy = Energy_;
+
+   fx12      = x12   ;
+   fx13      = x13   ;
+   fx23      = x23   ;
+   fm21      = m21   ;
+   fmAtm     = mAtm  ; 
+   fdelta    = delta ;
+   fSquared  = kSquared ;
+ 
+
+
 
    double sin12;
    double sin13;
@@ -176,7 +204,8 @@ void BargerPropagator::SetMNS( double x12, double x13, double x23,
 
 
    //if xAB = sin( xAB )^2
-   if ( kSquared ){
+   if ( kSquared )
+   {
       sin12 = sqrt( x12 );
       sin13 = sqrt( x13 );
       sin23 = sqrt( x23 );
@@ -184,9 +213,18 @@ void BargerPropagator::SetMNS( double x12, double x13, double x23,
    else
    {
       //if xAB = sin( 2 xAB )^2
-      sin12 = sqrt( 0.5*(1 - sqrt(1 - x12 ))  );
-      sin13 = sqrt( 0.5*(1 - sqrt(1 - x13 ))  );
-      sin23 = sqrt( 0.5*(1 - sqrt(1 - x23 ))  );
+      // Default is to specify sin(x) in the first octant 
+      // but this may be changed by the user to the second octant 
+      // (mostly only an issue for atmospheric mixing) 
+      if( kSx12Octant == 1 ) sin12 = sqrt( 0.5*(1 - sqrt(1 - x12 ))  );
+      else                   sin12 = sqrt( 0.5*(1 + sqrt(1 - x12 ))  );
+
+      if( kSx13Octant == 1 ) sin13 = sqrt( 0.5*(1 - sqrt(1 - x13 ))  );
+      else                   sin13 = sqrt( 0.5*(1 + sqrt(1 - x13 ))  );
+   
+      if( kSx23Octant == 1 ) sin23 = sqrt( 0.5*(1 - sqrt(1 - x23 ))  );
+      else                   sin23 = sqrt( 0.5*(1 + sqrt(1 - x23 ))  );
+   
    }
 
    if ( kNuType < 0 )
@@ -207,6 +245,7 @@ void BargerPropagator::DefinePath(double cz, double ProdHeight, bool kSetProfile
 {
 
    ProductionHeight = ProdHeight*1e5;
+   REarth = Earth->GetEarthRadiuskm() * 1.0e5;
    PathLength = sqrt( (REarth + ProductionHeight )*(REarth + ProductionHeight) 
                      - (REarth*REarth)*( 1 - cz*cz)) - REarth*cz;
    CosineZenith = cz;
@@ -227,12 +266,14 @@ void BargerPropagator::SetMatterPathLength()
       MatterPathLength +=  Earth->get_DistanceAcrossLayer(i);
 
    AirPathLength +=  Earth->get_DistanceAcrossLayer(0);
+
 }
+ 
 
 void BargerPropagator::SetAirPathLength(double x)
 {
-//      argument is [km], convert to [cm]
-      AirPathLength = x*1.0e5 - MatterPathLength;
+// argument is [km], convert to [cm]
+   AirPathLength = x*1.0e5 - MatterPathLength;
 }
 
 
@@ -271,7 +312,7 @@ void BargerPropagator::propagateLinear( int NuFlavor, double pathlength, double 
    int    i,j;
 
    double TransitionMatrix[3][3][2];
-   double TransitionProduct[3][3][2];
+   //double TransitionProduct[3][3][2]; // use global one
    double TransitionTemp[3][3][2];	
    double RawInputPsi[3][2];
    double OutputPsi[3][2];
@@ -330,5 +371,36 @@ void BargerPropagator::propagateLinear( int NuFlavor, double pathlength, double 
 }
 
 
-
+double BargerPropagator::GetPathAveragedDensity( )
+{
+   unsigned Layers = (unsigned) Earth->get_LayersTraversed( );
 	
+   double density_sum = 0.;
+   double length_sum = 0.;
+
+   for ( unsigned i = 0; i < Layers ; i++ )
+   {
+      density_sum += Earth->get_DistanceAcrossLayer(i) * Earth->get_DensityInLayer(i) * density_convert ;
+      length_sum  += Earth->get_DistanceAcrossLayer(i);
+   }
+
+   return density_sum / length_sum ;
+
+}
+	
+
+void BargerPropagator::SetDefaultOctant( int var   , int octant )
+{
+
+  // don't accept bad octants
+  if( octant != 1 && octant != 2 ) return;
+
+  if( var == 12 ) kSx12Octant = octant ;
+  if( var == 13 ) kSx13Octant = octant ;
+  if( var == 23 ) kSx23Octant = octant ;
+
+  // otherwise do nothing 
+
+}
+
+

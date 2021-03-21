@@ -12,9 +12,11 @@ EarthDensity::EarthDensity( )
    _density[ 3480.0 ]  =  11.3 ;
    _density[ 5701.0 ]  =  5.0 ;
    _density[ 6371.0 ]  =  3.3 ;
+   REarth  = 6371.0 ; 
 
    _TraverseDistance  = NULL;
    _TraverseRhos      = NULL;
+   
    init();
 
        
@@ -31,8 +33,9 @@ EarthDensity::EarthDensity( const char * file )
 void EarthDensity::LoadDensityProfile( const char * file )
 {
         ifstream PREM_dat;
-        double r_dist;          // radial distance -- map key //
+        double r_dist = 0.0;    // radial distance -- map key //
         double rho;             // density at that distance -- map value //
+        double REarth  = 6371.0 ; 
 
 	DensityFileName = file;
 
@@ -82,6 +85,8 @@ void EarthDensity::SetDensityProfile( double CosineZ, double PathLength , double
    _TraverseRhos[0] = 0.0;
    _TraverseDistance[0] =  PathLength - TotalEarthLength ;
 
+// std::cout << " Earth ... PathLenght: " << PathLength << " totallength " << TotalEarthLength << std::endl;
+
    if( CosineZ >= 0 )
    {  
        _TraverseDistance[0] =  PathLength;
@@ -103,11 +108,13 @@ void EarthDensity::SetDensityProfile( double CosineZ, double PathLength , double
    {
  
       _TraverseRhos[i+1]      = _Rhos[i];
-      CrossThis = 2.0*sqrt( _Radii[i]*_Radii[i]  - REarth*REarth*( 1 -CosineZ*CosineZ ) );
-      CrossNext = 2.0*sqrt( _Radii[i+1]*_Radii[i+1]      - REarth*REarth*( 1 -CosineZ*CosineZ ) );
+      CrossThis = 2.0*sqrt( _Radii[i]   * _Radii[i]    - REarth*REarth*( 1 -CosineZ*CosineZ ) );
 
      if( i < MaxLayer-1 )
+     {
+      CrossNext = 2.0*sqrt( _Radii[i+1] * _Radii[i+1]  - REarth*REarth*( 1 -CosineZ*CosineZ ) );
       _TraverseDistance[i+1]  =  0.5*( CrossThis-CrossNext )*km2cm;
+     }
      else
       _TraverseDistance[i+1]  =  CrossThis*km2cm;
     
@@ -133,10 +140,10 @@ void EarthDensity::ComputeMinLengthToLayers()
 	// first element of _Radii is largest radius!
 	for(int i=0; i < (int) _Radii.size() ; i++ )
 	{
-		// Using a cosine threshold instead! //
-		x = -1* sqrt( 1 - (_Radii[i] * _Radii[i] / ( REarth*REarth)) );
-		if ( i  == 0 ) x = 0;
-		_CosLimit[ _Radii[i] ] = x;
+            // Using a cosine threshold instead! //
+            x = -1* sqrt( 1 - (_Radii[i] * _Radii[i] / ( REarth*REarth)) );
+            if ( i  == 0 ) x = 0;
+                _CosLimit[ _Radii[i] ] = x;
 	}
 
 }

@@ -64,8 +64,6 @@ int main(int argc, char * argv[] )
 
   int    kNuBar  =  1 * v_in;
   double DM2     =  h_in * 2.4e-3;
-
-
   double Theta23 =  0.5   ;
   double Theta13 =  0.025  ;
   double dm2     =  7.6e-5;
@@ -237,7 +235,7 @@ double GetAnalyticMu2E( double x12, double x13, double x23,
 
 // This form is only valid when A / m31 is small
    double mat  =   dom * 2.0 * A * ( 1 - 2.0 * s13 * s13 ) / (m23+m21) ; 
-          mat += - 8.0 * c12 * c12 * s13 * s13 * s23 * s23 * ( 1 - 2.0 * s13 * s13 ) * 
+          mat += - 8.0 * c13 * c13 * s13 * s13 * s23 * s23 * ( 1 - 2.0 * s13 * s13 ) * 
                             Vmat  * cos( d32 ) * sin( d31 );
 
 

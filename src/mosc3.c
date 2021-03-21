@@ -43,22 +43,51 @@ void init_mixing_matrix(dm21f,dm32f,s12f,s23f,s31f,dcpf)
   memset(Ain,0,3*3*2*sizeof(double));
   Ain[0][0][re] = Ain[1][1][re] = Ain[2][2][re] = 1.0;
 
-  /***********
-  printf("dm21,dm32   : %f %f \n",dm21,dm32);
-  printf("s12,s23,s31 : %f %f %f \n",s12,s23,s31);
-  printf("dm  : %f %f %f \n",dm[0][0],dm[0][1],dm[0][2]);
-  printf("dm  : %f %f %f \n",dm[1][0],dm[1][1],dm[1][2]);
-  printf("dm  : %f %f %f \n",dm[2][0],dm[2][1],dm[2][2]);
-  ***********/
-  /***********
-  printf("mix : %f %f %f \n",mix[0][0][0],mix[0][1][0],mix[0][2][0]);
-  printf("mix : %f %f %f \n",mix[1][0][0],mix[1][1][0],mix[1][2][0]);
-  printf("mix : %f %f %f \n",mix[2][0][0],mix[2][1][0],mix[2][2][0]);
-  ***********/
 
+//printf("Mixing matrix -- real: \n" );
+//printf("mix : %f %f %f \n",mix[0][0][0],mix[0][1][0],mix[0][2][0]);
+//printf("mix : %f %f %f \n",mix[1][0][0],mix[1][1][0],mix[1][2][0]);
+//printf("mix : %f %f %f \n",mix[2][0][0],mix[2][1][0],mix[2][2][0]);
+
+//printf("\n\nMixing matrix -- imag: \n" );
+//printf("mix : %f %f %f \n",mix[0][0][1],mix[0][1][1],mix[0][2][1]);
+//printf("mix : %f %f %f \n",mix[1][0][1],mix[1][1][1],mix[1][2][1]);
+//printf("mix : %f %f %f \n",mix[2][0][1],mix[2][1][1],mix[2][2][1]);
 
 }
 
+
+/*
+ *   Initialize mixing matrix, etc.
+ */
+void init_mass_with_mixing_matrix(dm21f,dm32f, lMNS )
+     double dm21f,dm32f;
+     double lMNS[][3][2];
+{
+
+  dm21=dm21f ;  dm32=dm32f ;  
+  setMatterFlavor(nue_type);
+
+  setmass(dm21,dm32,dm);
+
+  // copy local MNS matrix to the static copy 
+  // used by mosc3.h (and subsequently mosc.h) routines
+  memcpy( mix, lMNS, 3*3*2*sizeof(double));
+
+  memset(Ain,0,3*3*2*sizeof(double));
+  Ain[0][0][re] = Ain[1][1][re] = Ain[2][2][re] = 1.0;
+
+//printf("Mixing matrix -- real: \n" );
+//printf("mix : %f %f %f \n",mix[0][0][0],mix[0][1][0],mix[0][2][0]);
+//printf("mix : %f %f %f \n",mix[1][0][0],mix[1][1][0],mix[1][2][0]);
+//printf("mix : %f %f %f \n",mix[2][0][0],mix[2][1][0],mix[2][2][0]);
+
+//printf("\n\nMixing matrix -- imag: \n" );
+//printf("mix : %f %f %f \n",mix[0][0][1],mix[0][1][1],mix[0][2][1]);
+//printf("mix : %f %f %f \n",mix[1][0][1],mix[1][1][1],mix[1][2][1]);
+//printf("mix : %f %f %f \n",mix[2][0][1],mix[2][1][1],mix[2][2][1]);
+
+}
 
 
 void get_oscillation_parameters(dm21f,dm32f,s12f,s23f,s31f,dcpf)
@@ -108,7 +137,7 @@ void get_transition_matrix(nutypei,Enuf,rhof,Lenf,Aout,phase_offsetf)
      double Aout[][3][2];
      double phase_offsetf ;
 {
-  int nutype, make_average ;
+  int nutype;
   double Enu, rho, Len ;
   double dmMatVac[3][3], dmMatMat[3][3];
   double phase_offset;
@@ -117,9 +146,36 @@ void get_transition_matrix(nutypei,Enuf,rhof,Lenf,Aout,phase_offsetf)
   rho=rhof ;
   Len=Lenf ;
   phase_offset = phase_offsetf ;
+
+
+//printf("nutype: %d \n", nutype );
+//printf("Mixing matrix -- real: \n" );
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[0][0][0],mix[0][1][0],mix[0][2][0]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[1][0][0],mix[1][1][0],mix[1][2][0]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[2][0][0],mix[2][1][0],mix[2][2][0]);
+
+//printf("\n\nMixing matrix -- imag: \n" );
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[0][0][1],mix[0][1][1],mix[0][2][1]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[1][0][1],mix[1][1][1],mix[1][2][1]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[2][0][1],mix[2][1][1],mix[2][2][1]);
+
+
   /*   propagate_mat(Ain,rho,Len,Enu,mix,dm,nutype,Aout);    */
   getM(Enu, rho, mix, dm, nutype, dmMatMat, dmMatVac);
   getA(Len, Enu, rho, mix, dmMatVac, dmMatMat, nutype, Aout,phase_offset);
+
+//printf("(after) Mixing matrix -- real: \n" );
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[0][0][0],mix[0][1][0],mix[0][2][0]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[1][0][0],mix[1][1][0],mix[1][2][0]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[2][0][0],mix[2][1][0],mix[2][2][0]);
+
+//printf("\n\nMixing matrix -- imag: \n" );
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[0][0][1],mix[0][1][1],mix[0][2][1]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[1][0][1],mix[1][1][1],mix[1][2][1]);
+//printf("mix : %10.9f %10.9f %10.9f \n",mix[2][0][1],mix[2][1][1],mix[2][2][1]);
+
+
+//abort();
 }
 
 
@@ -244,7 +300,7 @@ void convert_from_mass_eigenstate( state, flavor, pure )
                          int    flavor;
                          double pure [][2];
 {
-  int    i,j,k;
+  int    i,j;
   double mass    [3][2];
   double conj    [3][3][2];
   int    lstate  = state - 1;

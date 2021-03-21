@@ -8,11 +8,21 @@
 int main(int argc, char * argv[] )
 {
 
+   double dcp_in =  0.;
+   double h_in   = 1.0;
+   int    v_in   = 1.0;
+
+   if( argc >= 2 ) dcp_in = (double) atof( argv[1] );
+   if( argc >= 3 ) h_in   = (double) atof( argv[2] );
+   if( argc >= 4 ) v_in   = (int)    atoi( argv[3] );
+
+   h_in = ( h_in > 0 ? 1.0 : -1.0 );
+
    double cosineZ, energy;
    double e_start, e_end, e_step, cz_start, cz_end, cz_step;
    int i, j ;
 
-//// Binning	
+//// Types of Averaging	
    int NBinsEnergy = 200;
    int Dm12ZenithNbin = 200; 
 
@@ -32,15 +42,18 @@ int main(int argc, char * argv[] )
 
    
 /// Oscillation Parameters
-   bool kSquared = false;   // are we using sin^2(x) variables?
+// bool kSquared = false;   // are we using sin^2(x) variables?
+   bool kSquared = true ;   // are we using sin^2(x) variables?
 
-   int    kNuBar  = 1;
-   double DM2     = 2.5e-3;
-   double Theta23 = 1.0;
-   double Theta13 = 0.10;
-   double dm2     = 7.9e-5;
-   double Theta12 = 0.825;
-   double dcp     = 0.0;
+   int    kNuBar  =  1 * v_in;
+   double DM2     =  h_in * 2.5e-3;
+   double Theta23 =  0.5    ;
+   double Theta13 =  0.0238 ;
+   double dm2     =  7.6e-5 ;
+   double Theta12 =  0.302  ;
+// double delta   = 270.0 * (3.1415926/180.0);
+   double delta   =  dcp_in * (3.1415926/180.0);
+
 
    std::cout << "Using          " << std::endl
              << "      DM2      " <<  DM2      << std::endl
@@ -48,7 +61,8 @@ int main(int argc, char * argv[] )
              << "      Theta13  " <<  Theta13  << std::endl
              << "      dm2      " <<  dm2      << std::endl
              << "      Theta12  " <<  Theta12  << std::endl
-             << "      dcp      " <<  dcp      << std::endl;
+             << "      delta    " <<  delta    << std::endl;
+   std::cout << "      knubar   " <<  kNuBar   << std::endl;
 
    std::cout << "From "
 	     << " [ " << e_start << " - " << e_end << " ] GeV " << endl;
@@ -58,8 +72,10 @@ int main(int argc, char * argv[] )
    BargerPropagator   * bNu; 
 
    bNu = new BargerPropagator( );
-   bNu->UseMassEigenstates( false );
+   bNu->UseMassEigenstates( false ); // this is default (use flavor eigenstates)
 
+   // Octant for Theta23 in sin2(2x) mode
+   bNu->SetDefaultOctant( 23, 2 );
    // use the standard barger
    myNu = bNu;
 
@@ -128,7 +144,11 @@ int main(int argc, char * argv[] )
 
         cosineZ = cz_start + double(j)*cz_step;
   
-        myNu->SetMNS( Theta12,  Theta13, Theta23, dm2, DM2, dcp , energy, kSquared, kNuBar ); 
+        myNu->SetMNS( Theta12,  Theta13, Theta23, dm2, DM2, delta , energy, kSquared, kNuBar ); 
+
+//      if( i == 0 && j == 0 )
+//        print_mixing_matrix();
+
         myNu->DefinePath( cosineZ, 25.00  );
         myNu->propagate( 1*kNuBar );
   
@@ -162,22 +182,22 @@ int main(int argc, char * argv[] )
    TFile *tmp = new TFile("RawProb.root", "recreate");
    tmp->cd();
 
-   NuEToNuE3f 	   ->Write();
-   NuEToNuMu3f 	   ->Write();
-   NuEToNuTau3f    ->Write();
-   NuEToNuX3f 	   ->Write();
+   NuEToNuE3f    ->Write();
+   NuEToNuMu3f   ->Write();
+   NuEToNuTau3f  ->Write();
+   NuEToNuX3f    ->Write();
    
-   NuMuToNuE3f     ->Write();
-   NuMuToNuMu3f    ->Write();
-   NuMuToNuTau3f   ->Write();
-   NuMuToNuX3f 	   ->Write();
+   NuMuToNuE3f   ->Write();
+   NuMuToNuMu3f  ->Write();
+   NuMuToNuTau3f ->Write();
+   NuMuToNuX3f   ->Write();
 
-   NuTauToNuE3f    ->Write();
-   NuTauToNuMu3f   ->Write();
-   NuTauToNuTau3f  ->Write();
-   NuTauToNuX3f    ->Write();
+   NuTauToNuE3f  ->Write();
+   NuTauToNuMu3f ->Write();
+   NuTauToNuTau3f->Write();
+   NuTauToNuX3f  ->Write();
 
-   NuMuToNuTau2f   ->Write();
+   NuMuToNuTau2f ->Write();
 
    tmp->Close();
    	

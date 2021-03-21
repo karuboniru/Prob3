@@ -37,9 +37,9 @@ using namespace std;
 class EarthDensity
 {
 	public:
-                 // default contstructor for the Earth, and a radial density profile 
-                 // as specified by the SK 3f paper: PRD.74.032002 (2006) 
-                 EarthDensity( );
+                // default contstructor for the Earth, and a radial density profile 
+                // as specified by the SK 3f paper: PRD.74.032002 (2006) 
+                EarthDensity( );
                  
                 // constructor for a user-specified density profile, see PREM.dat 
 		EarthDensity( const char * );

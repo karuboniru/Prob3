@@ -1,6 +1,5 @@
 
-
-20121225
+Updated 20181119 
 
 Prob3++ is an Engine for computing three-flavor neutrino oscillation
 probabilities. The main library libThreeProb.a can be used
@@ -8,7 +7,7 @@ to externally call routines to compute said probabilities.
 
 ////// Library Version 
    This document is valid for library version
-    v2.10  
+    v3.10  
 
 
 ////// main library compilation
@@ -47,6 +46,18 @@ a file RawProb.root. The histograms therein can readily be viewed using makeOne.
  
 
     > root -l RawProb.root makeOne.C
+
+
+probLV.cc:
+> make probLV 
+> ./probLV 
+   
+  This module computes Lorentz-violating oscillation probabilities as a function of pathlength and neutrino 
+  energy either for neutrinos traversing the earth or through a slice of constant density 
+  matter.
+
+  > root -l fullSME_Prob.root drawLV.C
+
 
 ///// About Parameter inputs 
 
@@ -92,9 +103,11 @@ a file RawProb.root. The histograms therein can readily be viewed using makeOne.
 ///// About propagators 
 
   There are a few "propagators" included in this module, all of which derive from the
-  NeutrinoPropagator class. The most commonly used one is the BargerPropagator. 
+  NeutrinoPropagator class. The most commonly used one is the BargerPropagator, 
+  which describes standard PMNS oscillations.
+
   The neutrino oscillation probabilities are stored as doubles.
-  Its use follows:
+  Its use is as follows:
 
       // create a pointer to a new BargerPropagator Object
       BargerPropagator * bNu  = new BargerPropagator(  ); 
@@ -164,6 +177,54 @@ a file RawProb.root. The histograms therein can readily be viewed using makeOne.
    propagation routines may be made _without_ another call to SetMNS().
 
 
+   ////  
+   //
+   //  Lorentz Invariance Violation with the Full SME 
+   //
+   //
+   //  ** 20181819 
+   A propagator for the computation of Lorentz invariance-violation oscillations 
+   is provided via the FullSME propagator. It assumes propagation through 
+   constant density matter and calculates a fully three-flavor oscillation 
+   probability using a non-perturbative method from the Standard Model Extension 
+   framework. See PRD91 052003. 
+ 
+   In addition to setting the MNS mixing matrix the user must also specify 
+   the LV potentials (the "A" and "C" matrices) via the "Set*Matrix*" routines.
+
+   Ie to set the e-tau coefficients of the "C" matrix (only):
+
+   for ( i = 0 ; i < 3 ; i ++ )
+     for ( j = 0 ; j < 3 ; j ++ )
+     {
+       SMEnu->SetLVMatrixEntry( "A" , i, j, 0.0, 0.0 );
+       SMEnu->SetLVMatrixEntry( "C" , i, j, 0.0, 0.0 );
+     }
+   // index 0 is for nue 
+   // index 1 is for numu 
+   // index 2 is for nutau 
+   SMEnu->SetLVMatrixEntry( "C" , 0, 2, 7.5e-23, 0.0    );
+   SMEnu->SetLVMatrixEntry( "C" , 2, 0, 7.5e-23, 0.0    );
+
+   This must be done before a call to SetHamiltonian. 
+
+    SMEnu->SetMNS( Theta12,  Theta13, Theta23, dm2, DM2, delta , energy, kSquared, kNuBar ); 
+    // For propagation in the Earth
+    SMEnu->DefinePathFromLength( PathLength, 25.00  );
+
+    // For propagation in constant density matter, here 22 g/cm^3
+    //SMEnu->DefineLinearPath( PathLength, 22.0 );
+
+    SMEnu->SetHamiltonian( energy );
+    
+    No you can propagate! 
+    SMEnu->propagate( kNuBar );
+
+    Probabilities are returned using the same GetProb() routine 
+    from BargerPropagator
+
+   
+
 
 /////// about input density profiles
 
@@ -188,6 +249,28 @@ a file RawProb.root. The histograms therein can readily be viewed using makeOne.
 
 //////////
 
+
+//////////////////
+ Python Wrapper 
+
+ - A simple python wrapper for just the BargerPropagator class is provided 
+in the py_wrapper.c. It has been written under ctypes, instead of something 
+more fancy, because cytpes is bundled (and should therefore be present) in 
+all pthon distributions. 
+
+ To use the shared library must be used:
+
+ >make shared 
+
+ Be sure that the Prob3++ directory is included in your LD_LIBRARY_PATH, or install 
+the shared library into some directory that is. 
+
+
+ To run the test script, you may have to change the path to the python executable
+at the top of the file: simpleLinear.py . This script requires pyroot.
+ 
+
+
 ///////////// About
 
   This code has been written by members of the Super-Kamiokande collaboration
@@ -195,13 +278,8 @@ and is presented here in a purified form. Though not the sole author,
 Roger Wendell (-rvw) is presently maintaining the software. Comments and suggestions
 are welcome at:
 
+   raw@scphys.kyoto-u.ac.jp
    raw@suketto.icrr.u-tokyo.ac.jp
-   raw22@phy.duke.edu
 
    Other types of oscillation modules may be provided in the future.  Thanks kindly, 
-and please enjoy your personal search for cp violation!
-
-
-
-
-
+and please enjoy your personal search for cp and or Lorentz invariance violation!

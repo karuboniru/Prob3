@@ -4,7 +4,11 @@
 	
 
 extern "C" {
+
  void   init_mixing_matrix( double, double, double, double, double, double );
+
+ void   init_mass_with_mixing_matrix(double, double, double [][3][2] );
+
  void   get_oscillation_parameters( double, double, double, double, double, double );
 
  void   get_wavelength_23(double, double* );

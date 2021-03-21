@@ -27,21 +27,21 @@
 
 // Raw Probability Plots	
 
-	TH2F *_NuEToNuE3f 	= Bob->Get("NuEToNuE3f");
-	TH2F *_NuEToNuMu3f 	= Bob->Get("NuEToNuMu3f");
-	TH2F *_NuEToNuTau3f 	= Bob->Get("NuEToNuTau3f");
-	TH2F *_NuEToNuX3f 	= Bob->Get("NuEToNuX3f");
+	TH2F *_NuEToNuE3f 	=  (TH2F*) Bob->Get("NuEToNuE3f");
+	TH2F *_NuEToNuMu3f 	=  (TH2F*) Bob->Get("NuEToNuMu3f");
+	TH2F *_NuEToNuTau3f 	=  (TH2F*) Bob->Get("NuEToNuTau3f");
+	TH2F *_NuEToNuX3f 	=  (TH2F*) Bob->Get("NuEToNuX3f");
 	
 	
-	TH2F *_NuMuToNuE3f 	= Bob->Get("NuMuToNuE3f");
-	TH2F *_NuMuToNuMu3f 	= Bob->Get("NuMuToNuMu3f");
-	TH2F *_NuMuToNuTau3f 	= Bob->Get("NuMuToNuTau3f");
-	TH2F *_NuMuToNuX3f 	= Bob->Get("NuMuToNuX3f");
+	TH2F *_NuMuToNuE3f 	=  (TH2F*) Bob->Get("NuMuToNuE3f");
+	TH2F *_NuMuToNuMu3f 	=  (TH2F*) Bob->Get("NuMuToNuMu3f");
+	TH2F *_NuMuToNuTau3f 	=  (TH2F*) Bob->Get("NuMuToNuTau3f");
+	TH2F *_NuMuToNuX3f 	=  (TH2F*) Bob->Get("NuMuToNuX3f");
 
-	TH2F *_NuTauToNuE3f 	= Bob->Get("NuTauToNuE3f");
-	TH2F *_NuTauToNuMu3f 	= Bob->Get("NuTauToNuMu3f");
-	TH2F *_NuTauToNuTau3f 	= Bob->Get("NuTauToNuTau3f");
-	TH2F *_NuTauToNuX3f 	= Bob->Get("NuTauToNuX3f");
+	TH2F *_NuTauToNuE3f 	=  (TH2F*) Bob->Get("NuTauToNuE3f");
+	TH2F *_NuTauToNuMu3f 	=  (TH2F*) Bob->Get("NuTauToNuMu3f");
+	TH2F *_NuTauToNuTau3f 	=  (TH2F*) Bob->Get("NuTauToNuTau3f");
+	TH2F *_NuTauToNuX3f 	=  (TH2F*) Bob->Get("NuTauToNuX3f");
 //------------------- End of Raw Probability Plots	
 
 
