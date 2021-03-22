@@ -20,10 +20,7 @@ addfile(BargerPropagator)
 addfile(mosc)
 addfile(mosc3)
 addfile(FullSMEPropagator)
-# addfile(py_wrapper)
-
-# file(GLOB libs src/*)
-# add_library(mylib ${libs})
+addfile(py_wrapper)
 
 add_executable(probRoot probRoot.cc ${headers})
 target_link_libraries(probRoot ${ROOT_LIBRARIES} BargerPropagator EarthDensity mosc3 mosc)
@@ -37,8 +34,8 @@ target_link_libraries(probAnalytic ${ROOT_LIBRARIES} mosc3 mosc)
 add_executable(probLV probLV.cc ${headers})
 target_link_libraries(probLV ${ROOT_LIBRARIES} FullSMEPropagator BargerPropagator EarthDensity mosc3 mosc)
 
-add_library(ThreeProb SHARED src/py_wrapper.cc)
-target_link_libraries(ThreeProb PUBLIC ${ROOT_LIBRARIES} FullSMEPropagator BargerPropagator EarthDensity mosc3 mosc)
+add_library(ThreeProb SHARED $<TARGET_OBJECTS:py_wrapper>)
+target_link_libraries(ThreeProb INTERFACE PUBLIC ${ROOT_LIBRARIES} FullSMEPropagator BargerPropagator EarthDensity mosc3 mosc)
 
 install(TARGETS probRoot probLinear probAnalytic probLV ThreeProb DESTINATION out/) 
 file(GLOB scripts scripts/*)
